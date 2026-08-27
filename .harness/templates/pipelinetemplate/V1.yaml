@@ -1,0 +1,58 @@
+template:
+  name: pipelinetemplate
+  identifier: pipelinetemplate
+  versionLabel: V1
+  type: Pipeline
+  tags: {}
+  spec:
+    stages:
+      - stage:
+          name: deploy
+          identifier: deploy
+          description: ""
+          type: Deployment
+          spec:
+            deploymentType: Kubernetes
+            environment:
+              environmentRef: account.accountenv
+              deployToAll: false
+              infrastructureDefinitions:
+                - identifier: accountInfra
+                  inputs:
+                    identifier: accountInfra
+                    type: KubernetesDirect
+                    spec:
+                      namespace: <+input>
+            service:
+              serviceRef: account.minikubedeploy
+            execution:
+              steps:
+                - step:
+                    type: ShellScript
+                    name: ShellScript_1
+                    identifier: ShellScript_1
+                    spec:
+                      shell: Bash
+                      executionTarget: {}
+                      source:
+                        type: Inline
+                        spec:
+                          script: echo "success"
+                      environmentVariables: []
+                      outputVariables: []
+                    timeout: 10m
+              rollbackSteps: []
+          tags: {}
+          failureStrategies:
+            - onFailure:
+                errors:
+                  - AllErrors
+                action:
+                  type: MarkAsFailure
+    properties:
+      ci:
+        codebase:
+          connectorRef: account.github
+          repoName: hello.world.python
+          build: <+input>
+          sparseCheckout: []

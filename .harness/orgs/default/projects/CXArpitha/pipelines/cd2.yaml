@@ -1,0 +1,97 @@
+pipeline:
+  projectIdentifier: CXArpitha
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: test
+        identifier: test
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          caching:
+            enabled: false
+            override: true
+            paths: []
+          buildIntelligence:
+            enabled: false
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
+                  spec:
+                    connectorRef: account.MCR_Public_Registry
+                    image: cdvdv
+                    shell: Sh
+                    command: export execution_status=success
+                    outputVariables:
+                      - name: execution_status
+                        type: String
+                        value: execution_status
+                    runAsUser: "1000"
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: gcpaccount2
+              namespace: sdfd
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              containerSecurityContext:
+                runAsUser: "1000"
+              os: Linux
+    - stage:
+        name: execute
+        identifier: execute
+        description: ""
+        type: Custom
+        spec:
+          environment:
+            environmentRef: prod
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: test123
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: |+
+                          # echo "===== Raw value ====="
+                          # printf '%q\n' '<+pipeline.variables.commands>'
+
+                          # echo "===== Hex dump ====="
+                          # printf '%s' '<+pipeline.variables.commands>' | od -An -tx1
+
+                          # printtf '%s' '<+pipeline.variables.commands_b64>' \
+                          #   | base64 -d \
+                          #   > /tmp/runtime-commands.sh
+
+
+                          pwd
+
+                          echo <+pipeline.variables.commands>| base64 -d > commands.sh
+                          cat commands.sh
+                          ./commands.sh
+
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
+  variables:
+    - name: commands
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+  identifier: cd2
+  name: cd2

@@ -1,0 +1,33 @@
+template:
+  name: pipeline with stage that has input variable
+  identifier: pipeline_with_stage_that_has_input_variable
+  versionLabel: V1
+  type: Pipeline
+  projectIdentifier: CXArpitha
+  orgIdentifier: default
+  tags: {}
+  spec:
+    stages:
+      - stage:
+          name: deploy
+          identifier: deploy
+          tags: {}
+          template:
+            templateRef: stage_with_input_variable
+            versionLabel: V1
+            templateInputs:
+              type: Deployment
+              spec:
+                environment:
+                  environmentRef: <+input>
+                  environmentInputs: <+input>
+                  serviceOverrideInputs: <+input>
+                  infrastructureDefinitions: <+input>
+                service:
+                  serviceRef: <+input>
+                  serviceInputs: <+input>
+              variables:
+                - name: inputvariable
+                  type: String
+                  default: "50"
+                  value: <+input>

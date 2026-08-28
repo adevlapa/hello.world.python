@@ -1,0 +1,97 @@
+template:
+  name: pipelinetemp2
+  identifier: pipelinetemp2
+  versionLabel: v1
+  type: Pipeline
+  projectIdentifier: CXArpitha
+  orgIdentifier: default
+  tags: {}
+  spec:
+    stages:
+      - stage:
+          name: STO Source Code CVE Scan
+          identifier: STO_Source_Code_CVE_Scan
+          description: ""
+          type: Pipeline
+          spec:
+            org: default
+            pipeline: cd2
+            project: CXArpitha
+            inputs:
+              identifier: cd2
+              variables:
+                - name: parentExecutionUrl
+                  type: String
+                  value: <+pipeline.execution.url>
+          tags: {}
+    variables:
+      - name: action
+        type: String
+        description: |
+          DO NOT modify this variable.
+        required: false
+        value: <+eventPayload.action>
+      - name: basebranch
+        type: String
+        description: DO NOT modify this variable.
+        required: false
+        value: <+eventPayload.pull_request.base.ref>
+      - name: canary_run
+        type: String
+        description: ""
+        required: false
+        value: "null"
+      - name: repository
+        type: String
+        description: DO NOT modify this variable.
+        required: false
+        value: <+eventPayload.repository.full_name>
+      - name: reference_id
+        type: String
+        description: |
+          Branch identifier for pipeline behavior. Valid values: cdh_main, ds_main, ds_1_11, privatecloudbranches, publiccloudbranches, cdwmaster
+        required: true
+        value: <+input>
+    fixedInputsOnRerun: false
+    allowStageExecutions: false
+    delegateSelectors:
+      - re-eks-build
+    notificationRules:
+      - name: stl-failure
+        identifier: stlfailure
+        pipelineEvents:
+          - type: StageFailed
+            forStages:
+              - success_state
+        notificationMethod:
+          type: Email
+          spec:
+            userGroups: []
+            recipients:
+              - sdivgi@cloudera.com
+            executeOnDelegate: true
+            delegateSelectors:
+              - re-eks-build
+        enabled: true
+      - name: abort
+        identifier: abort
+        pipelineEvents:
+          - type: PipelineEnd
+        notificationMethod:
+          type: Webhook
+          spec:
+            webhookUrl: https://art.eng.cloudera.com/testing/api/v1/abort_review
+            headers:
+              reponame: <+eventPayload.repository.full_name>
+              prid: <+trigger.prNumber>
+            executeOnDelegate: true
+            delegateSelectors:
+              - re-eks-build
+        enabled: true
+    properties:
+      ci:
+        codebase:
+          connectorRef: account.harnessgithubkitchen
+          repoName: <+eventPayload.repository.full_name>
+          build: <+input>
+          sparseCheckout: []

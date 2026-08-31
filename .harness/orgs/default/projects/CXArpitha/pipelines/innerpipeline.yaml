@@ -31,7 +31,9 @@ pipeline:
                     source:
                       type: Inline
                       spec:
-                        script: echo "success"
+                        script: |-
+                          echo "success"
+                          echo "success"
                     environmentVariables: []
                     outputVariables: []
                   timeout: 10m

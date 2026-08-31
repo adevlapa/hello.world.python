@@ -40,5 +40,15 @@ pipeline:
           pipeline: innerpipeline
           gitBranch: branch1-patch2
           inputs: {}
+    - stage:
+        name: inner2
+        identifier: inner2
+        description: ""
+        type: Pipeline
+        spec:
+          org: default
+          project: CXArpitha
+          pipeline: innerpipelineClone
+          gitBranch: main
   identifier: outerpipelineClone
   name: outerpipelineClone
